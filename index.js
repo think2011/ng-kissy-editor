@@ -52,9 +52,6 @@
 
 
     angular.module('editor', [])
-        .controller('appCtrl', function ($scope) {
-            $scope.xx = '<p>1111111877899999998888887</p>';
-        })
         .directive('editor', function ($timeout) {
             return {
                 restrict  : 'EA',

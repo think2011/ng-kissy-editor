@@ -1,3 +1,9 @@
+/*
+ <link rel="stylesheet" type="text/css" href="http://g.tbcdn.cn/kg/editor-plugins/1.1.2/assets/editor.css">
+ <script src="//g.alicdn.com/kissy/k/5.0.1/seed.js" data-config="{combine:false}"></script>
+ <script src="http://g.tbcdn.cn/kg/editor-plugins/1.1.3/mods.js"></script>
+ */
+
 (function () {
     require.config({
         packages: [
@@ -10,38 +16,38 @@
 
     var plugins = [
         "source-area",
-        /*   "separator",
-         "bold",
-         "italic",
-         "font-family",
-         "font-size",
-         "strike-through",
-         "underline",
-         "separator",
-         "checkbox-source-area",
-         "!zy-img-selector",
-         "link",
-         "fore-color",
-         "back-color",
-         "resize",
-         "draft",
-         "undo",
-         "indent",
-         "outdent",
-         "unordered-list",
-         "ordered-list",
-         "element-path",
-         "page-break",
-         "preview",
-         "maximize",
-         "remove-format",
-         "heading",
-         "justify-left",
-         "justify-center",
-         "justify-right",
-         "table",
-         "smiley",
-         "flash"*/
+        "!zy-img-selector",
+        "separator",
+        "bold",
+        "italic",
+        "font-family",
+        "font-size",
+        "strike-through",
+        "underline",
+        "separator",
+        "checkbox-source-area",
+        "link",
+        "fore-color",
+        "back-color",
+        //"resize",
+        "draft",
+        "undo",
+        "indent",
+        "outdent",
+        "unordered-list",
+        "ordered-list",
+        "element-path",
+        "page-break",
+        "preview",
+        "maximize",
+        "remove-format",
+        "heading",
+        "justify-left",
+        "justify-center",
+        "justify-right",
+        "table",
+        "smiley",
+        "flash"
     ];
 
     var pluginsConfig = {};
@@ -51,7 +57,7 @@
     });
 
 
-    angular.module('editor', [])
+    angular.module('ng-editor', [])
         .directive('editor', function ($timeout) {
             return {
                 restrict  : 'EA',
@@ -85,20 +91,31 @@
                     });
 
                     $timeout(function () {
+                        var locked = false;
+
                         // model to view
-                        scope.$watch('model', function (newVal) {
+                        scope.$watch('model', function (newVal, oldVal) {
+                            if (locked) return;
+
                             newVal && editor.setData(newVal + '');
                         });
 
+                        // view to model
+                        editor.on('blur', setModel);
 
                         // view to model
-                        editor.on('blur', function (e) {
-                            console.log(editor.getData());
+                        editor.on('selectionChange', setModel);
+
+                        function setModel(e) {
+                            locked      = true;
                             scope.model = editor.getData();
                             scope.$apply();
-                        });
-                    });
 
+                            $timeout(function () {
+                                locked = false;
+                            });
+                        }
+                    });
                 });
             }
         });

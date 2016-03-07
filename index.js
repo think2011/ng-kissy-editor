@@ -58,19 +58,21 @@
 
 
     angular.module('ng-editor', [])
-        .directive('editor', function ($timeout) {
+        .directive('editor', function ($timeout, $interval) {
             return {
                 restrict  : 'EA',
                 replace   : true,
                 transclude: true,
                 scope     : {
-                    model: '='
+                    initModel: '=',
+                    model    : '='
                 },
                 template  : '<textarea></textarea>',
                 link      : linkFn
             };
 
             function linkFn(scope, element, attrs) {
+                var interVal = null;
                 var editorId = 'editor-' + Date.now();
                 element.attr('id', editorId).css('visibility', 'hidden');
 
@@ -91,31 +93,25 @@
                     });
 
                     $timeout(function () {
-                        var locked = false;
+                        // init
+                        if (scope.initModel) {
+                            editor.setData(scope.initModel + '');
+                        }
 
                         // model to view
-                        scope.$watch('model', function (newVal, oldVal) {
-                            if (locked) return;
-
+                        scope.$watch('initModel', function (newVal, oldVal) {
                             newVal && editor.setData(newVal + '');
                         });
 
                         // view to model
-                        editor.on('blur', setModel);
-
-                        // view to model
-                        editor.on('selectionChange', setModel);
-
-                        function setModel(e) {
-                            locked      = true;
+                        interVal = $interval(function () {
                             scope.model = editor.getData();
-                            scope.$apply();
-
-                            $timeout(function () {
-                                locked = false;
-                            });
-                        }
+                        }, 300);
                     });
+                });
+
+                scope.$on('$destroy', function () {
+                    $interval.cancel(interVal);
                 });
             }
         });
